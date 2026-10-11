@@ -91,12 +91,26 @@ class SessionAborted(Exception):
     """Unrecoverable setup failure inside run_session (e.g. no log dir)."""
 
 # ── Helpers ───────────────────────────────────────────────────────────────
+# Every ping / tracert / ipconfig call goes through run(). When the GUI (or a
+# windowed .exe) launches those console programs, Windows opens a new console
+# window for each one, and parallel pings make a storm of flashing cmd
+# windows. These flags start the child process with no window at all.
+# Output is still captured exactly as before. Empty on non-Windows systems.
+_HIDE_KW = {}
+if os.name == "nt":
+    _si = subprocess.STARTUPINFO()
+    _si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    _si.wShowWindow = subprocess.SW_HIDE
+    _HIDE_KW = {"creationflags": subprocess.CREATE_NO_WINDOW,
+                "startupinfo": _si}
+
 def run(cmd, timeout=15):
-    """Run an argv LIST (never a shell string). Returns (rc, stdout, stderr)."""
+    """Run an argv LIST (never a shell string). Returns (rc, stdout, stderr).
+    The child never opens a console window (see _HIDE_KW)."""
     try:
         p = subprocess.run(cmd, shell=False, capture_output=True, text=True,
                            encoding="utf-8", errors="replace",
-                           timeout=timeout)
+                           timeout=timeout, **_HIDE_KW)
         return p.returncode, p.stdout.strip(), p.stderr.strip()
     except subprocess.TimeoutExpired:
         return -1, "", "timeout"

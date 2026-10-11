@@ -359,5 +359,20 @@ class RunHelperTests(unittest.TestCase):
         self.assertTrue(err)
 
 
+class HiddenWindowTests(unittest.TestCase):
+    """Child processes must not open console windows (GUI cmd-window storm)."""
+
+    def test_hide_flags_only_on_windows(self):
+        import os
+        import subprocess
+        import optimizer_core as core
+        if os.name == "nt":
+            self.assertEqual(core._HIDE_KW["creationflags"],
+                             subprocess.CREATE_NO_WINDOW)
+            self.assertIn("startupinfo", core._HIDE_KW)
+        else:
+            self.assertEqual(core._HIDE_KW, {})
+
+
 if __name__ == "__main__":
     unittest.main()
