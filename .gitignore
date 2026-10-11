@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Logs and run output
+*.log
+ping_log.txt
+report.json
+summary.txt
+elevated_result.json
+
+# Build output
+build/
+dist/
+*.spec
+
+# Editors / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
